@@ -12,18 +12,18 @@
         <method_context>
         </method_context>
 
+	<exec_method type="method" name="start" exec="/usr/local/bin/zsnapper %{config_file}" timeout_seconds="60"/>
+        <exec_method type="method" name="stop" exec=":kill" timeout_seconds="60"/>
+
         <property_group name="startd" type="framework">
             <propval name="duration" type="astring" value="child"/>
             <propval name="ignore_error" type="astring" value="core,signal"/>
         </property_group>
 
         <property_group name="application" type="application">
-            <propval name="config_file" type="astring" value="/opt/nym/zsnapper/zsnapper.json"/>
+            <propval name="config_file" type="astring" value="/etc/zsnapper.json"/>
         </property_group>
         
-        <exec_method type="method" name="start" exec="/opt/nym/zsnapper/zsnapper %{config_file}" timeout_seconds="60"/>
-        <exec_method type="method" name="stop" exec=":kill" timeout_seconds="60"/>
-
         <stability value="Evolving"/>
 
         <template>

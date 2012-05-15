@@ -11,22 +11,15 @@ This is a ZFS snapshotting service for Solaris, OpenIndiana, SmartOS and friends
 Installation
 ============
 
-Unpack
-------
-
-Clone this repository (or unpack the download) into `/opt/nym/zsnapper`. Any
-other directory will do as well, but you will need to modify the SMF manifest
-to update the paths.
-
-Install dependencies
---------------------
-
-Run `npm install` in `/opt/nym/zsnapper`.
+    # npm -g install zsnapper
 
 Configure
 ---------
 
-Update the config file `zsnapper` conf with your desired snapshot configuration.
+Copy the config file `zsnapper.json.sample` (probably installed in
+`/usr/local/lib/node_modules/zsnapper` by npm) to
+`/etc/zsnapper.json` and update it with your desired configuration.
+
 It's a JSON file of the format:
 
     {
@@ -71,12 +64,13 @@ Start
 To test the setup, start the service (as root) with the name of the config file
 as the only parameter.
 
-    # /opt/nym/zsnapper/zsnapper /opt/nym/zsnapper/zsnapper.json
+    # /usr/local/bin/zsnapper /etc/zsnapper.json
 
 A better alternative, once everything seems to work as intended, is to use the
-accompanying SMF manifest. Edit `zsnapper.xml` to suit your installation
-(particularly the path to the `zsnapper` binary and `zsnapper.json` config
-file). Then import it:
+accompanying SMF manifest. Copy `zsnapper.xml` from
+`/usr/local/lib/node_modules/zsnapper` to your home directory and edit it to
+suit your installation. The only things you need to modify are the paths to the
+`zsnapper` executable and the `zsnapper.json` config file. Then import it:
 
     # svccfg import zsnapper.xml
 
