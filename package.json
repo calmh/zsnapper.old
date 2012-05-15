@@ -5,7 +5,7 @@
     "keywords": ["solaris", "zfs", "illumos", "openindiana", "smartos"],
     "homepage": "http://nym.se/zsnapper/docs/",
     "version": "0.0.1",
-    "bin": "./server.js",
+    "bin": "./zsnapper",
     "scripts": {
         "test": "NODE_PATH=lib PATH=test:$PATH node_modules/.bin/mocha -R spec",
         "hint": "jshint *.js lib/*.js",
