@@ -18,10 +18,10 @@
         </property_group>
 
         <property_group name="application" type="application">
-            <propval name="config_file" type="astring" value="/opt/nym/zsnapper-inst/zsnapper.json"/>
+            <propval name="config_file" type="astring" value="/opt/nym/zsnapper/zsnapper.json"/>
         </property_group>
         
-        <exec_method type="method" name="start" exec="/opt/nym/zsnapper-inst/server.js %{config_file}" timeout_seconds="60"/>
+        <exec_method type="method" name="start" exec="/opt/nym/zsnapper/server.js %{config_file}" timeout_seconds="60"/>
         <exec_method type="method" name="stop" exec=":kill" timeout_seconds="60"/>
 
         <stability value="Evolving"/>
