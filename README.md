@@ -80,3 +80,8 @@ The service should be started automatically, which you can verify:
     STATE          STIME    FMRI
     online         10:56:26 svc:/site/zsnapper:default
 
+License
+-------
+
+2-Clause BSD
+
