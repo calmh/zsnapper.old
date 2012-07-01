@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "async": "0.1.x",
-        "cron": "0.3.x",
+        "cron": "https://github.com/calmh/node-cron/tarball/master",
         "underscore": "1.3.x",
         "zfs": "*"
     },
