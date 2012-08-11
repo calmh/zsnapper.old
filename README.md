@@ -83,5 +83,5 @@ The service should be started automatically, which you can verify:
 License
 -------
 
-2-Clause BSD
+MIT
 
