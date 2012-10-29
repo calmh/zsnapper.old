@@ -11,6 +11,30 @@ This is a ZFS snapshotting service for Solaris, OpenIndiana, SmartOS and friends
 Installation
 ============
 
+SmartOS
+-------
+
+### Build the tar.gz
+
+Two alternatives:
+
+ 1. Use my "compiled" version from http://nym.se/t/smartos-snapper.tar.gz
+
+ 2.  In a zone that has npm and build tools available, or on a machine running
+     Mac OS X or whatever with Node.js installed:
+
+     # git clone https://github.com/calmh/zsnapper.git
+     # cd zsnapper
+     # fakeroot make smartos
+
+Transfer the tarball to your GZ and unpack it from the root. Read below about
+configuring (the config file is in `/opt/local/etc`), then enable the service
+with `svcadm import /opt/custom/smf/zsnapper.xml`. Check the log
+`/var/svc/log/site-zsnapper.log` for issues.
+
+Non-SmartOS Solaris, Linux, or FreeBSD
+--------------------------------------
+
     # npm -g install zsnapper
 
 Configure

@@ -6,6 +6,8 @@ TAR := smartos-zsnapper.tar.gz
 UID = $(shell id -u)
 
 
+smartos: $(TAR)
+
 $(TAR): $(BIN) $(SMF) $(ETC) $(BUILD)/opt/local/bin $(BUILD)/opt/local/etc $(BUILD)/opt/custom/smf
 ifneq ($(UID), 0)
 	$(error Should run as uid 0 for correct file ownership; consider fakeroot)
