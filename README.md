@@ -1,12 +1,15 @@
-      ____     ____    ___      __     _____   _____      __   _ __ 
-     /\_ ,`\  /',__\ /' _ `\  /'__`\  /\ '__`\/\ '__`\  /'__`\/\`'__\
-     \/_/  /_/\__, `\/\ \/\ \/\ \L\.\_\ \ \L\ \ \ \L\ \/\  __/\ \ \/
-       /\____\/\____/\ \_\ \_\ \__/.\_\\ \ ,__/\ \ ,__/\ \____\\ \_\
-       \/____/\/___/  \/_/\/_/\/__/\/_/ \ \ \/  \ \ \/  \/____/ \/_/
-                                         \ \_\   \ \_\
-                                          \/_/    \/_/
+```
+ _______ _ __   __ _ _ __  _ __   ___ _ __
+|_  / __| '_ \ / _` | '_ \| '_ \ / _ \ '__|
+ / /\__ \ | | | (_| | |_) | |_) |  __/ |
+/___|___/_| |_|\__,_| .__/| .__/ \___|_|
+                    |_|   |_|
+```
 
-This is a ZFS snapshotting service for Solaris, OpenIndiana, SmartOS and friends.
+This is a ZFS snapshotting service for Solaris, OpenIndiana, SmartOS and
+friends. It takes periodic snapshots of the datasets you specify, at whatever
+intervals you like. You tell it how many of each kind to keep around and the
+rest gets cleaned out.
 
 Installation
 ============
@@ -23,9 +26,11 @@ Two alternatives:
  2.  In a zone that has npm and build tools available, or on a machine running
      Mac OS X or whatever with Node.js installed:
 
+     ```
      # git clone https://github.com/calmh/zsnapper.git
      # cd zsnapper
      # fakeroot make smartos
+     ```
 
 Transfer the tarball to your GZ and unpack it from the root. Read below about
 configuring (the config file is in `/opt/local/etc`), then enable the service
