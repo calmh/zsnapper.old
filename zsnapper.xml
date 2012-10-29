@@ -2,7 +2,7 @@
 <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
 <service_bundle type="manifest" name="zsnapper">
 	<service name="site/zsnapper" type="service" version="1">
-		<create_default_instance enabled="false"/>
+		<create_default_instance enabled="true"/>
 		<single_instance/>
 
 		<dependency name="filesystem" grouping="require_all" restart_on="error" type="service">
