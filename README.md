@@ -21,7 +21,7 @@ SmartOS
 
 Two alternatives:
 
- 1. Use my "compiled" version from http://nym.se/t/smartos-snapper.tar.gz
+ 1. Use my "compiled" version from http://nym.se/smartos/zsnapper.tar.gz
 
  2.  In a zone that has npm and build tools available, or on a machine running
      Mac OS X or whatever with Node.js installed:
