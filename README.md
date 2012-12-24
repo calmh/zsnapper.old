@@ -34,7 +34,7 @@ Two alternatives:
 
 Transfer the tarball to your GZ and unpack it from the root. Read below about
 configuring (the config file is in `/opt/local/etc`), then enable the service
-with `svcadm import /opt/custom/smf/zsnapper.xml`. Check the log
+with `svccfg import /opt/custom/smf/zsnapper.xml`. Check the log
 `/var/svc/log/site-zsnapper.log` for issues.
 
 Non-SmartOS Solaris, Linux, or FreeBSD
