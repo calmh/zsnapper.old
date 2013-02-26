@@ -1,110 +1,60 @@
 #!/usr/node/bin/node
 
-var _ = require('underscore');
-var async = require('async');
+"use strict";
+
 var CronJob = require('cron').CronJob;
+var async = require('async');
+var fs = require('fs')
+var minimatch = require('minimatch')
 var util = require('util');
 var zfs = require('zfs')
-var fs = require('fs')
-
-// Zero pad an integer to the specified length.
-function padInteger(num, length) {
-    "use strict";
-
-    var r = '' + num;
-    while (r.length < length) {
-        r = '0' + r;
-    }
-    return r;
-}
-
-// Format a date to yyyymmddThhmmssZ (UTC).
-function formatDate(d) {
-    "use strict";
-
-    var year, month, day, hour, minute, second;
-    year = d.getUTCFullYear();
-    month = padInteger(d.getUTCMonth() + 1, 2);
-    day = padInteger(d.getUTCDate(), 2);
-    hour = padInteger(d.getUTCHours(), 2);
-    minute = padInteger(d.getUTCMinutes(), 2);
-    second = padInteger(d.getUTCSeconds(), 2);
-    return year + month + day + 'T' + hour + minute + second + 'Z';
-};
 
 // Generate a snapshot name given a base.
 function snapshotName(base) {
-    "use strict";
-
-    var when = formatDate(new Date());
+    var when = (new Date()).toISOString().replace(/[-:]|(\.\d\d\d)/g, '');
     return base + '-' + when;
 }
 
 // Create a snapshot on the specified dataset with the specified name, exluding all datasets in excl.
-function createSnapshot(ds, sn, excl) {
-    "use strict";
-
-    function destroyExcludes(snaps, excl) {
-        var toDestroy = snaps.filter(function (s) {
-            var fields = s.name.split('@');
-            var createdNow = fields[1] === sn;
-            var inExclude = _.contains(excl, fields[0]);
-            return createdNow && inExclude;
-        });
-
-        async.forEachSeries(toDestroy, function (snap, cb) {
-            util.log('Destroy snapshot ' + snap.name + ' (excluded)');
-            zfs.destroy({ name: snap.name, recursive: true }, cb);
-        });
-    }
-
+function createSnapshot(ds, sn, cb) {
     util.log('Create snapshot ' + ds + '@' + sn);
-    zfs.snapshot({ dataset: ds, name: sn, recursive: true }, function (err) {
-        if (err) {
-            util.log(err);
-        } else {
-            zfs.list({ type: 'snapshot' }, function (err, snaps) {
-                if (err) {
-                    util.log(err);
-                } else {
-                    destroyExcludes(snaps, excl);
-                }
-            });
-        }
-    });
+    zfs.snapshot({ dataset: ds, name: sn, recursive: true }, cb);
 }
 
 // Keep only num snapshots with the specified base on the specified dataset
-function cleanSnapshots(ds, base, num) {
+function cleanSnapshots(patterns, base, num, cb) {
     zfs.list({ type: 'snapshot' }, function (err, snaps) {
-        // Find all snapshots that match the specified dataset and base.
-        var ourSnaps = snaps.filter(function (s) {
-            var fields = s.name.split('@');
-            var parts = fields[1].split('-');
-            return fields[0] === ds && parts[0] === base;
+        var allSnaps = {};
+        patterns.forEach(function (pat) {
+            snaps.forEach(function (s) {
+                var fields = s.name.split('@');
+                var parts = fields[1].split('-');
+                if (minimatch(fields[0], pat) && parts[0] === base) {
+                    var l = allSnaps[fields[0]] || [];
+                    l.push(s.name);
+                    allSnaps[fields[0]] = l;
+                }
+            });
         });
 
-        if (ourSnaps.length > num) {
-            // Get just the sorted list of names.
-            var snapNames = ourSnaps.map(function (s) { return s.name; });
-            snapNames.sort();
+        async.eachLimit(Object.keys(allSnaps), 10, function (dsName, cb) {
+            var snapNames = allSnaps[dsName];
+            if (snapNames.length > num) {
+                snapNames.sort();
 
-            // Get the ones that exceed the specified number of snapshots.
-            var toDestroy = snapNames.slice(0, snapNames.length - num);
+                // Get the ones that exceed the specified number of snapshots.
+                var toDestroy = snapNames.slice(0, snapNames.length - num);
 
-            // Destroy them, one after the other.
-            async.forEachSeries(toDestroy, function (sn, cb) {
-                util.log('Destroy snapshot ' + sn + ' (cleaned)');
-                zfs.destroy({ name: sn, recursive: true }, cb);
-            });
-        }
+                // Destroy them, one after the other.
+                async.eachSeries(toDestroy, function (sn, cb) {
+                    util.log('Destroy snapshot ' + sn + ' (cleaned)');
+                    zfs.destroy({ name: sn, recursive: true }, cb);
+                }, cb);
+            } else {
+                cb(null);
+            }
+        }, cb);
     });
-}
-
-function snapshot(dataset, base, excl, num) {
-    var name = snapshotName(base);
-    createSnapshot(dataset, name, excl);
-    cleanSnapshots(dataset, base, num);
 }
 
 function loadConfig() {
@@ -113,16 +63,32 @@ function loadConfig() {
     return confObj;
 }
 
+function snap(datasets, snapBase, num) {
+    var snapId = snapshotName(snapBase);
+    zfs.list({type: 'filesystem,volume'}, function (err, dss) {
+        dss = dss.map(function (s) { return s.name; });
+        var toSnap = dss.filter(function (ds) {
+            return datasets.filter(function (pat) { return minimatch(ds, pat) }).length > 0;
+        });
+
+        async.eachLimit(toSnap, 10, function (ds, cb) {
+            createSnapshot(ds, snapId, cb);
+        }, function () {
+            cleanSnapshots(datasets, snapBase, num, function () {
+                util.log("Done " + snapId);
+            });
+        });
+    });
+}
+
 var cronJobs = [];
 var conf = loadConfig();
-_.each(conf, function (jobs, dataset) {
-    _.each(jobs, function (config, name) {
-        var job = new CronJob('00 ' + config.when, function () {
-            var excl = config.exclude || [];
-            snapshot(dataset, name, excl, parseInt(config.count, 10));
-        }, null, true, 'UTC');
-        cronJobs.push(job);
-    });
+Object.keys(conf).forEach(function (snapBase) {
+    var config = conf[snapBase];
+    var job = new CronJob('00 ' + config.when, function () {
+        snap(config.datasets, snapBase, parseInt(config.count, 10));
+    }, null, true);
+    cronJobs.push(job);
 });
 
 // vim: set filetype=javascript:

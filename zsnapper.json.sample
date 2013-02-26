@@ -1,29 +1,27 @@
 {
-	"zones": {
-		"minute": {
-			"when": "* * * * *",
-			"count": 15,
-			"exclude": [ "zones/swap", "zones/dump" ]
-		},
-		"hourly": {
-			"when": "0 * * * *",
-			"count": 24,
-			"exclude": [ "zones/swap", "zones/dump" ]
-		},
-		"daily": {
-			"when": "00 05 * * *",
-			"count": 10,
-			"exclude": [ "zones/swap", "zones/dump" ]
-		},
-		"weekly": {
-			"when": "00 05 * * 1",
-			"count": 4,
-			"exclude": [ "zones/swap", "zones/dump" ]
-		},
-		"monthly": {
-			"when": "00 05 1 * *",
-			"count": 12,
-			"exclude": [ "zones/swap", "zones/dump" ]
-		}
-	}
+    "quick": {
+        "when": "*/5 * * * *",
+        "count": 12,
+        "datasets": [ "zones/*-*-*-*", "zones/config", "zones/opt", "zones/usbkey", "zones/var" ]
+    },
+    "hourly": {
+        "when": "0 * * * *",
+        "count": 24,
+        "datasets": [ "zones/*-*-*-*", "zones/config", "zones/opt", "zones/usbkey", "zones/var" ]
+    },
+    "daily": {
+        "when": "00 05 * * *",
+        "count": 10,
+        "datasets": [ "zones/*-*-*-*", "zones/config", "zones/opt", "zones/usbkey", "zones/var" ]
+    },
+    "weekly": {
+        "when": "00 05 * * 1",
+        "count": 4,
+        "datasets": [ "zones/*-*-*-*" ]
+    },
+    "monthly": {
+        "when": "00 05 1 * *",
+        "count": 12,
+        "datasets": [ "zones/*-*-*-*" ]
+    }
 }

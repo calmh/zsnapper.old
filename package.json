@@ -13,9 +13,9 @@
   "version": "1.0.0",
   "bin": "./zsnapper",
   "dependencies": {
-    "async": "~0.1.22",
+    "async": "~0.2.5",
     "cron": "~1.0.1",
-    "underscore": "~1.4.2",
+    "minimatch": "~0.2.11",
     "zfs": "~1.0.0"
   },
   "repository": {
