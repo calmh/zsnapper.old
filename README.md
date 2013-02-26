@@ -52,26 +52,19 @@ Copy the config file `zsnapper.json.sample` (probably installed in
 It's a JSON file of the format:
 
     {
-        <dataset name>: {
-            <snapshot name>: {
-                "when": <cron string>,
-                "count": <number of snapshots>,
-                "exclude": [ <dataset to be excluded>, ... ]
-            },
-            <snapshot name>: {
-                "when": <cron string>,
-                "count": <number of snapshots>,
-                "exclude": [ <dataset to be excluded>, ... ]
-            }
+        <snapshot name>: {
+            "when": <cron string>,
+            "count": <number of snapshots>,
+            "datasets": [ <dataset wildcard>, ... ]
         },
-        <dataset name>: {
-            ...
+        <snapshot name>: {
+            "when": <cron string>,
+            "count": <number of snapshots>,
+            "datasets": [ <dataset wildcard>, ... ]
         }
     }
 
 Where:
-
-  - *dataset name* is a name of a dataset to snapshot. Example: `zones`.
 
   - *snapshot name* is a base to build snapshot names of. The current date and
     time will be appended. Example: `daily` which will result in snapshot names
@@ -84,8 +77,9 @@ Where:
   - *number of snapshots* is the number of snapshots that should be kept
     historically before being destroyed.
 
-  - *exclude* is a list of dataset names (under the main *dataset name*) that
-    should not be snapshotted. Example: `[ "zones/swap", "zones/dump" ]`.
+  - *dataset wildcard* is a wildcard matching datasets to snapshot.
+    Example: `zones/*-*-*-*` to match datasets under `zones` that might
+    look like uuids.
 
 Start
 -----
