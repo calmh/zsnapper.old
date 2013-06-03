@@ -24,7 +24,7 @@ echo "No config file, installing default into $config."
 cp zsnapper/zsnapper.ini "$config" || fail
 fi
 
-if [ ! -f "smf" ] ; then
+if [ ! -f "$smf" ] ; then
 echo "No SMF manifest, installing into $smf."
 cp zsnapper/zsnapper.xml "$smf" || fail
 fi
