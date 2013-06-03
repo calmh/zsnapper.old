@@ -17,91 +17,20 @@ Installation
 SmartOS
 -------
 
-### Build the tar.gz
+    bash <(curl -sk https://raw.github.com/calmh/zsnapper/master/install.sh)
 
-Two alternatives:
-
- 1. Use my "compiled" version from http://nym.se/smartos/zsnapper.tar.gz
-
- 2.  In a zone that has npm and build tools available, or on a machine running
-     Mac OS X or whatever with Node.js installed:
-
-     ```
-     # git clone https://github.com/calmh/zsnapper.git
-     # cd zsnapper
-     # fakeroot make smartos
-     ```
-
-Transfer the tarball to your GZ and unpack it from the root. Read below about
-configuring (the config file is in `/opt/local/etc`), then enable the service
-with `svccfg import /opt/custom/smf/zsnapper.xml`. Check the log
-`/var/svc/log/site-zsnapper.log` for issues.
+This will install into /opt/local/zsnapper and drop default config and manifest
+into /opt/local/etc and /opt/custom/smf respectively. If the config is already
+present it won't be overwritten, so this can be used for upgrades as well.
 
 Non-SmartOS Solaris, Linux, or FreeBSD
 --------------------------------------
 
     # npm -g install zsnapper
 
-Configure
----------
-
-Copy the config file `zsnapper.json.sample` (probably installed in
-`/usr/local/lib/node_modules/zsnapper` by npm) to
-`/etc/zsnapper.json` and update it with your desired configuration.
-
-It's a JSON file of the format:
-
-    {
-        <snapshot name>: {
-            "when": <cron string>,
-            "count": <number of snapshots>,
-            "datasets": [ <dataset wildcard>, ... ]
-        },
-        <snapshot name>: {
-            "when": <cron string>,
-            "count": <number of snapshots>,
-            "datasets": [ <dataset wildcard>, ... ]
-        }
-    }
-
-Where:
-
-  - *snapshot name* is a base to build snapshot names of. The current date and
-    time will be appended. Example: `daily` which will result in snapshot names
-    of the type `daily-20120515T1314900Z`.
-
-  - *cron string* is a cron-format description of when the snapshot should be
-    taken. `man 5 crontab` for details. Example: `15 0 * * 1` for snapshots at
-    00:15 the first of every month.
-
-  - *number of snapshots* is the number of snapshots that should be kept
-    historically before being destroyed.
-
-  - *dataset wildcard* is a wildcard matching datasets to snapshot.
-    Example: `zones/*-*-*-*` to match datasets under `zones` that might
-    look like uuids.
-
-Start
------
-
-To test the setup, start the service (as root) with the name of the config file
-as the only parameter.
-
-    # /usr/local/bin/zsnapper /etc/zsnapper.json
-
-A better alternative, once everything seems to work as intended, is to use the
-accompanying SMF manifest. Copy `zsnapper.xml` from
-`/usr/local/lib/node_modules/zsnapper` to your home directory and edit it to
-suit your installation. The only things you need to modify are the paths to the
-`zsnapper` executable and the `zsnapper.json` config file. Then import it:
-
-    # svccfg import zsnapper.xml
-
-The service should be started automatically, which you can verify:
-
-    # svcs site/zsnapper
-    STATE          STIME    FMRI
-    online         10:56:26 svc:/site/zsnapper:default
+Copy the zsnapper.ini to a suitable place, start zsnapper with the location of
+the config file as the only parameter. For Solaris, there's an example SMF in
+zsnapper.xml.
 
 License
 -------

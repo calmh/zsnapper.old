@@ -12,7 +12,7 @@
 		<method_context>
 		</method_context>
 
-		<exec_method type="method" name="start" exec="/opt/local/bin/zsnapper %{config_file}" timeout_seconds="60"/>
+		<exec_method type="method" name="start" exec="/opt/local/zsnapper/zsnapper %{config_file}" timeout_seconds="60"/>
 		<exec_method type="method" name="stop" exec=":kill" timeout_seconds="60"/>
 
 		<property_group name="startd" type="framework">
@@ -21,7 +21,7 @@
 		</property_group>
 
 		<property_group name="application" type="application">
-			<propval name="config_file" type="astring" value="/opt/local/etc/zsnapper.json"/>
+			<propval name="config_file" type="astring" value="/opt/local/etc/zsnapper.ini"/>
 		</property_group>
 
 		<stability value="Evolving"/>

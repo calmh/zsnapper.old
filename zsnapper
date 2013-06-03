@@ -4,91 +4,46 @@
 
 var CronJob = require('cron').CronJob;
 var async = require('async');
-var fs = require('fs')
-var minimatch = require('minimatch')
 var util = require('util');
-var zfs = require('zfs')
 
-// Generate a snapshot name given a base.
-function snapshotName(base) {
-    var when = (new Date()).toISOString().replace(/[-:]|(\.\d\d\d)/g, '');
-    return base + '-' + when;
-}
+var config = require('./lib/config.js');
+var dspattern = require('./lib/dspattern.js');
+var SnapshotSet = require('./lib/snapshotset.js');
 
-// Create a snapshot on the specified dataset with the specified name, exluding all datasets in excl.
-function createSnapshot(ds, sn, cb) {
-    util.log('Create snapshot ' + ds + '@' + sn);
-    zfs.snapshot({ dataset: ds, name: sn, recursive: true }, cb);
-}
+function applySnap(job, ds, cb) {
+    util.log('Process ' + ds + '@' + job.tag);
+    var s = new SnapshotSet(ds, job.tag);
+    s.snapshot(function (err) {
+        if (err) {
+            cb(err);
+        }
 
-// Keep only num snapshots with the specified base on the specified dataset
-function cleanSnapshots(patterns, base, num, cb) {
-    zfs.list({ type: 'snapshot' }, function (err, snaps) {
-        var allSnaps = {};
-        patterns.forEach(function (pat) {
-            snaps.forEach(function (s) {
-                var fields = s.name.split('@');
-                var parts = fields[1].split('-');
-                if (minimatch(fields[0], pat) && parts[0] === base) {
-                    var l = allSnaps[fields[0]] || [];
-                    l.push(s.name);
-                    allSnaps[fields[0]] = l;
-                }
-            });
-        });
-
-        async.eachLimit(Object.keys(allSnaps), 10, function (dsName, cb) {
-            var snapNames = allSnaps[dsName];
-            if (snapNames.length > num) {
-                snapNames.sort();
-
-                // Get the ones that exceed the specified number of snapshots.
-                var toDestroy = snapNames.slice(0, snapNames.length - num);
-
-                // Destroy them, one after the other.
-                async.eachSeries(toDestroy, function (sn, cb) {
-                    util.log('Destroy snapshot ' + sn + ' (cleaned)');
-                    zfs.destroy({ name: sn, recursive: true }, cb);
-                }, cb);
-            } else {
-                cb(null);
-            }
-        }, cb);
+        s.prune(job.keep, cb);
     });
 }
 
-function loadConfig() {
-    var data = fs.readFileSync(process.argv[2], 'utf-8');
-    var confObj = JSON.parse(data);
-    return confObj;
-}
+function snap(job) {
+    async.mapSeries(job.dataset, dspattern, function (err, datasets) {
+        if (err) {
+            throw err;
+        }
 
-function snap(datasets, snapBase, num) {
-    var snapId = snapshotName(snapBase);
-    zfs.list({type: 'filesystem,volume'}, function (err, dss) {
-        dss = dss.map(function (s) { return s.name; });
-        var toSnap = dss.filter(function (ds) {
-            return datasets.filter(function (pat) { return minimatch(ds, pat) }).length > 0;
-        });
+        var merged = [];
+        merged = merged.concat.apply(merged, datasets);
 
-        async.eachLimit(toSnap, 10, function (ds, cb) {
-            createSnapshot(ds, snapId, cb);
-        }, function () {
-            cleanSnapshots(datasets, snapBase, num, function () {
-                util.log("Done " + snapId);
-            });
+        async.forEachSeries(merged, function (ds, cb) {
+            applySnap(job, ds, cb);
         });
     });
 }
 
 var cronJobs = [];
-var conf = loadConfig();
-Object.keys(conf).forEach(function (snapBase) {
-    var config = conf[snapBase];
-    var job = new CronJob('00 ' + config.when, function () {
-        snap(config.datasets, snapBase, parseInt(config.count, 10));
-    }, null, true);
-    cronJobs.push(job);
-});
+var jobs = config(process.argv[2]);
 
-// vim: set filetype=javascript:
+jobs.forEach(function (job) {
+    util.log('Scheduling ' + job.tag + ' at ' + job.schedule)
+    var cronJob = new CronJob('00 ' + job.schedule, function () {
+        snap(job);
+    }, null, true);
+    cronJobs.push(cronJob);
+});
