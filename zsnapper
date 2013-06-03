@@ -31,8 +31,16 @@ function snap(job) {
         var merged = [];
         merged = merged.concat.apply(merged, datasets);
 
-        async.forEachSeries(merged, function (ds, cb) {
-            applySnap(job, ds, cb);
+        var snapSets = merged.map(function (ds) {
+            return new SnapshotSet(ds, job.tag);
+        });
+
+        async.forEachSeries(snapSets, function (snapSet, cb) {
+            snapSet.snapshot(cb);
+        }, function () {
+            async.forEachSeries(snapSets, function (snapSet, cb) {
+                snapSet.prune(job.keep, cb);
+            });
         });
     });
 }
