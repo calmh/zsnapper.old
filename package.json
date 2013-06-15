@@ -10,7 +10,7 @@
     "smartos"
   ],
   "homepage": "http://nym.se/zsnapper/docs/",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "bin": "./zsnapper",
   "dependencies": {
     "async": "~0.2.5",
