@@ -17,7 +17,7 @@ Installation
 SmartOS
 -------
 
-    bash <(curl -sk https://raw.github.com/calmh/zsnapper/master/install.sh)
+    bash <(curl -Lsk https://raw.githubusercontent.com/calmh/zsnapper/master/install.sh)
 
 This will install into /opt/local/zsnapper and drop default config and manifest
 into /opt/local/etc and /opt/custom/smf respectively. If the config is already
