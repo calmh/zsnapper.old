@@ -3,7 +3,9 @@
 branch="master"
 tar="https://codeload.github.com/calmh/zsnapper/tar.gz/$branch"
 instdir="/opt/local"
-config="/opt/local/etc/zsnapper.ini"
+configdir="/opt/local/etc"
+configfile="zsnapper.ini"
+config="$configdir/$configfile"
 smf="/opt/custom/smf/zsnapper.xml"
 
 fail() {
@@ -13,6 +15,7 @@ exit -1
 
 echo "Installing into $instdir/zsnapper."
 
+mkdir -p $instdir
 cd "$instdir" || fail
 [ -d zsnapper.previous ] && rm -rf zsnapper.previous
 [ -d zsnapper ] && mv zsnapper zsnapper.previous
@@ -21,6 +24,7 @@ mv "zsnapper-$branch" zsnapper || fail
 
 if [ ! -f "$config" ] ; then
 echo "No config file, installing default into $config."
+mkdir -p "$configdir"
 cp zsnapper/zsnapper.ini "$config" || fail
 fi
 
